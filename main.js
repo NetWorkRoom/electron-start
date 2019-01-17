@@ -1,5 +1,21 @@
-// Модули для управления жизнью приложения и создания собственного окна браузера
-const { app, BrowserWindow } = require('electron')
+// Модули для управления жизнью приложения и создания собственного окна браузера.
+const { app, BrowserWindow } = require('electron');
+const path = require("path");
+
+// Перерисовка окна при внесении изменений, без необходимости перезапускать проект. 
+require('electron-reload')(__dirname);
+
+// Для отделения кода работающего только для разработки, добавляем модуль electron-is-dev
+const isDev = require('electron-is-dev');
+
+if (isDev) {
+  console.log('Running in development');
+} else {
+  console.log('Running in production');
+}
+
+// Для отключения сообщений о недостаточной безопасности добавляем строку
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 // Выводим сообщение в консоли Node.js о запущеном процессе
 console.log('Executing main.js');
@@ -13,17 +29,26 @@ function createWindow() {
   console.log('Creating mainWindow');
 
   // Создаем окно браузера.
-  mainWindow = new BrowserWindow({ width: 800, height: 600 })
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true,
+      webSecurity: false
+    }
+  })
   
   // Выводим сообщение в консоли браузера о подключении файла index.html
   console.log('Loading index.html into mainWindow');
 
   // и загружаем файл index.html он содержит наше приложение.
-  mainWindow.loadFile('index.html')
+  // mainWindow.loadFile('index.html');
+  // Вариант с указанием пути к файлу
+  mainWindow.loadFile(`${path.join(__dirname, "/index.html")}`);
 
   // Открываем инструменты разработчика (DevTools). 
   // Если необходимо раскомментируйте строку ниже
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   // Запускается при закрытии окна.
   mainWindow.on('closed', function () {
