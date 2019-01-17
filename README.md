@@ -8,7 +8,7 @@ npm install --global --production windows-build-tools
 yarn global add windows-build-tools
 ```
 
-2. В проект добавляем [electron-reload] - позволет обновлять окно без перезапуска проекта.  
+2. В проект добавляем [electron-reload] - позволяет обновлять окно без перезапуска проекта.  
    Если используем Electron совместно с React CRA или Vue CLI данный модуль не нужен 
 ```
 yarn add --dev electron-reload
@@ -17,7 +17,7 @@ yarn add --dev electron-reload
 require('electron-reload')(__dirname);
 ```
 
-3. В зависимоти от того как будет реализовано приложение и какая у него будет структура 
+3. В зависимости от того как будет реализовано приложение и какая у него будет структура 
   можно по разному прописывать пути к index.html
 ```
 // 1 - mainWindow.loadFile('index.html');
@@ -27,7 +27,7 @@ require('electron-reload')(__dirname);
 // 5 - mainWindow.loadUrl(`file://${path.join(__dirname, "/public/index.html")}`);
 ```
 
-1. Для отделения кода работающего только для разработки, добавляем модуль - [electron-is-dev]
+4. Для отделения кода работающего только для разработки, добавляем модуль - [electron-is-dev]
 ```
 npm install electron-is-dev
 // или
@@ -67,18 +67,18 @@ const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-d
 // BACKBONE_DEBUGGER, JQUERY_DEBUGGER,  ANGULARJS_BATARANG, VUEJS_DEVTOOLS,  REDUX_DEVTOOLS, REACT_PERF,
 // CYCLEJS_DEVTOOL, MOBX_DEVTOOLS,  APOLLO_DEVELOPER_TOOLS
 
-// инсталируем расширение перед вызовом DevTools
+// инсталлируем расширение перед вызовом DevTools
 installExtension(REACT_DEVELOPER_TOOLS);
 mainWindow.webContents.openDevTools();
 ```
 
-7. Для установки в DevTools расширения [Devtron], которое помогает тестировать код, отслеживать баги и оптимально отлаживать приложени. Устанавливаем модуль в проект и иснталируем его.
+7. Для установки в DevTools расширения [Devtron], которое помогает тестировать код, отслеживать баги и оптимально отлаживать приложении. Устанавливаем модуль в проект и инсталлируем его.
 ```
 npm install --save-dev devtron
 // или
 yarn add --dev devtron
 
-// Прописываем в консоли запущеного приложения
+// Прописываем в консоли запущенного приложения
 require('devtron').install();
 ``` 
 
