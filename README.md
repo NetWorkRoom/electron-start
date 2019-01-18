@@ -10,7 +10,7 @@
     y: 300, // отступ окна сверху от экрана
     width: 800,     // ширина
     height: 600,    // высота
-    show: true,    // показывать после содания
+    show: true,    // показывать после создания
     minWidth: 300, // минимальная ширина окна
     minHeight: 200, // минимальная высота окна
     maxWidth: 1200, // максимальная ширина окна
@@ -25,25 +25,25 @@ const { BrowserWindow } = require('electron')
 let mainWindow = new BrowserWindow({ 
   width: 800,     // ширина
   height: 600,    // высота
-  show: false,    // скрыть после содания
+  show: false,    // скрыть после создания
 })
 mainWindow.once('ready-to-show', () => {
   mainWindow.show() // показать окно после полной загрузки
 })
 ```
-Можно создавать приложение состоящее из нескольких окон для этого достаточно создать доплнительно экземпляры объекта BrowserWindow
+Можно создавать приложение состоящее из нескольких окон для этого достаточно создать дополнительно экземпляры объекта BrowserWindow.
 ```
 childWindow = new BrowserWindow({width: 800, height: 400})
 childWindow.loadFile(`${path.join(__dirname, "/index_child.html")}`);
 childWindow.on('ready-to-show', () => { childWindow.show() })
 childWindow.on('closed', () => { childWindow = null })
 ```
-Для того чтобы окны имели взаимоотношение радитель-ребенок при создании дочернего окна
-нужно указвть его родителя. Функционал хорошо работат в MacOS, в Windows к сожалению нет.
+Для того чтобы окна имели взаимоотношение родитель-ребенок при создании дочернего окна
+нужно указать его родителя. Функционал хорошо работает в MacOS, в Windows к сожалению нет.
 ```
 childWindow = new BrowserWindow({width: 800, height: 400, parent: mainWindow})
 ```
-Создание дочернего окна в виде модального окна внутри родительского окна. Функционал работат в MacOS, в Windows к сожалению нет.
+Создание дочернего окна в виде модального окна внутри родительского окна. Функционал работает в MacOS, в Windows к сожалению нет.
 ```
 childWindow = new BrowserWindow({width: 800, height: 400, parent: mainWindow, modal: true,})
 ```
