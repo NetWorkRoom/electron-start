@@ -3,10 +3,35 @@
   <head>
     <meta charset="UTF-8">
     <title>Hello Electron!</title>
+        <style>
+          * {
+            cursor: default
+          }
+        
+          body {
+            /* убираем выделение текста и изображений */
+            -webkit-user-select: none;
+            /* позволяем курсором двигать окно используя данный элемент в разметке */
+            -webkit-app-region: drag;
+          }
+        
+          select {
+            /* запрещаем двигать курсором окно используя данный элемент в разметке */
+            -webkit-app-region: no-drag;
+          }
+        </style>
   </head>
   <body>
+    <h1>Main Window</h1>
     <h1 style="color:brown;">HTML контент загружен из файла index.html</h1>
     <p>Просто немного текста для примера</p>
+    <p>
+      <select name="" id="">
+        <option value="">Option 1</option>
+        <option value="">Option 2</option>
+        <option value="">Option 3</option>
+      </select>
+    </p>
     <!-- Весь Node.js APIs будет доступен здесь. -->
     Вы используете Node.js - <script>document.write(process.versions.node)</script>,
     Chromium - <script>document.write(process.versions.chrome)</script>,

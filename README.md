@@ -1,90 +1,103 @@
-# Electron - Полезные настройки и инструменты
-Список дополнительных инструментов для создания приложения на Electron.js
+# Electron - API
+Список основных методов и функций для создания приложения на Electron.js
 
-1. Для нативной работы с модулями Node.js устанавливаем глобально -  [windows-build-tools]
+### BrowserWindow
 ```
-npm install --global --production windows-build-tools
-// or
-yarn global add windows-build-tools
+// Кроме размеров окна можно задавать и другие параметры при инициализации приложения, 
+// для примера показаны наиболее популярные свойства
+    mainWindow = new BrowserWindow({
+    x: 1200, // отступ окна слева от экрана
+    y: 300, // отступ окна сверху от экрана
+    width: 800,     // ширина
+    height: 600,    // высота
+    show: true,    // показывать после содания
+    minWidth: 300, // минимальная ширина окна
+    minHeight: 200, // минимальная высота окна
+    maxWidth: 1200, // максимальная ширина окна
+    maxHeight: 500, // максимальная высота окна
+    resizable: false, // будет ли окно изменять размеры
+    backgroundColor: '#99a6c1', // цвет фона окна
+  })
 ```
-
-2. В проект добавляем [electron-reload] - позволяет обновлять окно без перезапуска проекта.  
-   Если используем Electron совместно с React CRA или Vue CLI данный модуль не нужен 
+Более правильный вариант загрузки окна, пользователь увидит содержимое окна только после полной его загрузки.
 ```
-yarn add --dev electron-reload
-// в main.js прописываем строку
-
-require('electron-reload')(__dirname);
+const { BrowserWindow } = require('electron')
+let mainWindow = new BrowserWindow({ 
+  width: 800,     // ширина
+  height: 600,    // высота
+  show: false,    // скрыть после содания
+})
+mainWindow.once('ready-to-show', () => {
+  mainWindow.show() // показать окно после полной загрузки
+})
 ```
-
-3. В зависимости от того как будет реализовано приложение и какая у него будет структура 
-  можно по разному прописывать пути к index.html
+Можно создавать приложение состоящее из нескольких окон для этого достаточно создать доплнительно экземпляры объекта BrowserWindow
 ```
-// 1 - mainWindow.loadFile('index.html');
-// 2 - mainWindow.loadFile(`${path.join(__dirname, "/index.html")}`);
-// 3 - mainWindow.loadUrl('http://localhost:3000');
-// 4 - mainWindow.loadUrl(`file://${__dirname}/index.html`);
-// 5 - mainWindow.loadUrl(`file://${path.join(__dirname, "/public/index.html")}`);
+childWindow = new BrowserWindow({width: 800, height: 400})
+childWindow.loadFile(`${path.join(__dirname, "/index_child.html")}`);
+childWindow.on('ready-to-show', () => { childWindow.show() })
+childWindow.on('closed', () => { childWindow = null })
 ```
-
-4. Для отделения кода работающего только для разработки, добавляем модуль - [electron-is-dev]
+Для того чтобы окны имели взаимоотношение радитель-ребенок при создании дочернего окна
+нужно указвть его родителя. Функционал хорошо работат в MacOS, в Windows к сожалению нет.
 ```
-npm install electron-is-dev
-// или
-yarn add electron-is-dev
-// в main.js прописываем и добавляем необходимый код
-const isDev = require('electron-is-dev');
- if (isDev) {
-    console.log('Running in development');
-} else {
-    console.log('Running in production');
+childWindow = new BrowserWindow({width: 800, height: 400, parent: mainWindow})
+```
+Создание дочернего окна в виде модального окна внутри родительского окна. Функционал работат в MacOS, в Windows к сожалению нет.
+```
+childWindow = new BrowserWindow({width: 800, height: 400, parent: mainWindow, modal: true,})
+```
+Существует возможность выключить стандартную рамку и топбар у окна, но такое окно нельзя будет перемещать для этого добавляем к разметке специальные свойства CSS
+```
+childWindow = new BrowserWindow({width: 800, height: 400, parent: mainWindow, frame: false })
+// CSS показан для примера
+ * { cursor: default; }
+body {
+  /* убираем выделение текста и изображений */
+  -webkit-user-select: none;
+  /* позволяем курсором двигать окно используя данный элемент в разметке */
+  -webkit-app-region: drag;
+}
+select {
+  /* запрещаем двигать курсором окно используя данный элемент в разметке */
+  -webkit-app-region: no-drag;
 }
 ```
-
-5. Для того чтобы убрать из консоли сообщения о недостаточной безопасности можно добавить строку, использовать только для разработки, для продакшен нужно настроить [безопасность] правильно.
-Добавляем так же webPreferences в объект BrowserWindow
+Для того чтобы после закрытия окна сохранялось его положение после закрытия, лучше всего воспользоватся дополнительным модулем - [electron-window-state]
 ```
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
-
-// добавляем webPreferences в объект BrowserWindow
-mainWindow = new BrowserWindow({
-  webPreferences: {					
-    nodeIntegration: true,
-    webSecurity: false
-  }
+// Установить модуль
+npm install --save electron-window-state 
+// или
+yarn add electron-window-state
+```
+Подключаем модуль запоминающий положение и размер окна на экране перед закрытием
+```
+const windowStateKeeper = require('electron-window-state');
+```
+Устанавливаем в  windowStateKeeper размеры окна по умолчанию
+```
+let mainWindowState = windowStateKeeper({
+  defaultWidth: 800,
+  defaultHeight: 400
 });
 ```
-
-6. Для установки в DevTools расширений для работы с популярными фреймворками устанавливаем - [electron-devtools-installer]. В данном проекте не установлен.
+Добвляем параметры в BrowserWindow
 ```
-npm install electron-devtools-installer --save-dev
-// or
-yarn add electron-devtools-installer --dev
-
-// в main.js прописываем 
-const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
-// добавляем необходимые расширение EMBER_INSPECTOR, REACT_DEVELOPER_TOOLS,
-// BACKBONE_DEBUGGER, JQUERY_DEBUGGER,  ANGULARJS_BATARANG, VUEJS_DEVTOOLS,  REDUX_DEVTOOLS, REACT_PERF,
-// CYCLEJS_DEVTOOL, MOBX_DEVTOOLS,  APOLLO_DEVELOPER_TOOLS
-
-// инсталлируем расширение перед вызовом DevTools
-installExtension(REACT_DEVELOPER_TOOLS);
-mainWindow.webContents.openDevTools();
+mainWindow = new BrowserWindow({
+  x: mainWindowState.x, // значение до закрытия окна по x
+  y: mainWindowState.y, // значение до закрытия окна по y
+  width: mainWindowState.width, // значение width до закрытия окна
+  height: mainWindowState.height, // значение height до закрытия окна
+})
+```
+Инициализируем слежение за положением и размером окна
+```
+mainWindowState.manage(mainWindow)
 ```
 
-7. Для установки в DevTools расширения [Devtron], которое помогает тестировать код, отслеживать баги и оптимально отлаживать приложении. Устанавливаем модуль в проект и инсталлируем его.
-```
-npm install --save-dev devtron
-// или
-yarn add --dev devtron
+Методов и параметров значительно больше чем рассмотрено здесь, для поиска необходимого решения по манипуляциям с окнами лучше всего обратиться к документации - [BrowserWindow] и [webContents]
 
-// Прописываем в консоли запущенного приложения
-require('devtron').install();
-``` 
 
-[electron-reload]:https://www.npmjs.com/package/electron-reload
-[windows-build-tools]: https://www.npmjs.com/package/windows-build-tools
-[electron-is-dev]: https://www.npmjs.com/package/electron-is-dev
-[electron-devtools-installer]: https://www.npmjs.com/package/electron-devtools-installer
-[Devtron]: https://electronjs.org/devtron
-[безопасность]:https://electronjs.org/docs/tutorial/security
+[BrowserWindow]: https://electronjs.org/docs/api/browser-window
+[webContents]: https://electronjs.org/docs/api/web-contents
+[electron-window-state]: https://www.npmjs.com/package/electron-window-state
