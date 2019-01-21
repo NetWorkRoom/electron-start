@@ -1,33 +1,59 @@
 // Модули для управления жизнью приложения и создания собственного окна браузера.
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, dialog } = require('electron');
 const path = require("path");
 
 // Перерисовка окна при внесении изменений, без необходимости перезапускать проект. 
 require('electron-reload')(__dirname);
 
-// Для отделения кода работающего только для разработки, добавляем модуль electron-is-dev
-const isDev = require('electron-is-dev');
-
-if (isDev) {
-  console.log('Running in development');
-} else {
-  console.log('Running in production');
-}
-
 // Для отключения сообщений о недостаточной безопасности добавляем строку
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
-
-// Выводим сообщение в консоли Node.js о запущеном процессе
-console.log('Executing main.js');
 
 // Сохранztv глобальную ссылку на объект window, В противном случае окно будет
 // закрываться автоматически, если объект JavaScript является объектом сборки мусора.
 let mainWindow
 
-function createWindow() {
-  // Выводим сообщение в консоли браузера о создании нового окна
-  console.log('Creating mainWindow');
+function showDialog() {
+  dialog.showOpenDialog({
+    defaultPath: './images', // Путь по умолчанию 
+    buttonLabel: 'Select Logo', // Название кнопки в диалоге
+    properties: [
+      'openFile', // Указываем тип диалога 
+      'multiSelections', // Указываем возможность выбрать несколько файлов
+      'createDirectory' // Добавляем кнопку создать новую папку в MacOS
+    ] 
+  }, (openPath) => {
+    console.log(openPath) // Получим массив с путями к файлам
+  })
+}
 
+function saveDialog() {
+  dialog.showSaveDialog({
+    defaultPath: './images', // Путь по умолчанию 
+  }, (filename) => {
+      console.log(filename) // Получим путь с именем файла
+  })
+}
+
+function messageDialog() {
+  let buttons = ['Yes', 'No', 'Maybe'];
+  dialog.showMessageBox({
+    buttons: buttons,
+    title: 'Electron Message Dialog',
+    message: 'Please select an answer',
+    detail: 'A more descriptive message with some details',
+  }, (buttonIndex) => {
+      console.log('User selected: ' + buttons[buttonIndex]) // Получим ответ из диалога
+  })
+}
+
+function messageErrorDialog() {
+  dialog.showErrorBox(
+    'Electron Error Message',
+    'Error Message'
+  )
+}
+
+function createWindow() {
   // Создаем окно браузера.
   mainWindow = new BrowserWindow({
     width: 800,
@@ -37,9 +63,6 @@ function createWindow() {
       webSecurity: false
     }
   })
-  
-  // Выводим сообщение в консоли браузера о подключении файла index.html
-  console.log('Loading index.html into mainWindow');
 
   // и загружаем файл index.html он содержит наше приложение.
   // mainWindow.loadFile('index.html');
@@ -48,14 +71,17 @@ function createWindow() {
 
   // Открываем инструменты разработчика (DevTools). 
   // Если необходимо раскомментируйте строку ниже
-  mainWindow.webContents.openDevTools()
+  //  mainWindow.webContents.openDevTools() 
+
+  // Показываем диалог через 3 секунды после появления окна приложения
+  // setTimeout(showDialog, 3000);
+  // setTimeout(saveDialog, 3000);
+  // setTimeout(messageDialog, 3000);
+  setTimeout(messageErrorDialog, 3000);
 
   // Запускается при закрытии окна.
   mainWindow.on('closed', function () {
-
-    // Выводим сообщение в консоли Node.js при закрытии окна
-    console.log('mainWindow closed!');
-    
+   
     // После закрытия окна ,удаляются ранее созданные объекты 
     // для организации работы приложения.
     mainWindow = null
