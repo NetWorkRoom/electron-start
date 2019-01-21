@@ -2,42 +2,42 @@
 Список основных методов и функций для создания приложения на Electron.js
 
 ### [session]
-Для того чтобы получить доступ к ссесии окна достаточно вызвать свойство ssesiion
+Для того чтобы получить доступ к сессии окна достаточно вызвать свойство ssesiion
 ```
 let mainSession mainWindow.webContents.session;  // получим Session {}
 let altSession = altWindow.webContents.session; // получим Session {}
 ```
-В стандартной реализации, не зависимо сколько окон в прижении они имеют один общий объект Session {} 
+В стандартной реализации, не зависимо сколько окон в приложении они имеют один общий объект Session {} 
 ```
  let defaultSession = session.defaultSession;
 ```
-Для того чтобы назначить для окна свою ссесию нужно ее отдельно создать и назначить окну и в названии должен стоять префикс persist:  
+Для того чтобы назначить для окна свою сессию нужно ее отдельно создать и назначить окну и в названии должен стоять префикс persist:  
 ```
 let appSession = session.fromPartition('persist:partitionOne')
  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
-      session: appSession, // подключеем индивидуальную сессию  
+      session: appSession, // подключаем индивидуальную сессию  
     }
   })
 ``` 
-Написанное выше можно записать короче, не надо создовать let appSession
+Написанное выше можно записать короче, не надо создавать let appSession
 ```
 mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
-      partition: 'persist:partitionOne', // подключеем индивидуальную сессию 
+      partition: 'persist:partitionOne', // подключаем индивидуальную сессию 
     }
   })
 ```
-Для очичистки значения localStorage в текущей сессии используем .clearStorageData()
+Для очистки значения localStorage в текущей сессии используем .clearStorageData()
 ```
 mainSession.clearStorageData()
 ```
 ### [cookies]
-Для получения значений cookies используем конструкцию gh  запуске окна мы получим cookies с сайта
+Для получения значений cookies используем конструкцию показанную ниже, при  ее работе мы получим cookies с сайта
 ```
 mainWindow.loadURL(`https://github.com`);
 let mainSession = mainWindow.webContents.session; 
@@ -96,7 +96,7 @@ mainSession.on('will-download', (event, downloadItem, webContents) => {
         process.stdout.write('Downloaded - ' + progress + '%');
       }     
     })
-    
+
     // Сообщение о успешной загрузке 
     downloadItem.once('done', (event, state) => {
       if (state === 'completed') {
