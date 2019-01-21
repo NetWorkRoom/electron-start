@@ -1,90 +1,113 @@
-# Electron - Полезные настройки и инструменты
-Список дополнительных инструментов для создания приложения на Electron.js
+# Electron - API
+Список основных методов и функций для создания приложения на Electron.js
 
-1. Для нативной работы с модулями Node.js устанавливаем глобально -  [windows-build-tools]
+### [session]
+Для того чтобы получить доступ к ссесии окна достаточно вызвать свойство ssesiion
 ```
-npm install --global --production windows-build-tools
-// or
-yarn global add windows-build-tools
+let mainSession mainWindow.webContents.session;  // получим Session {}
+let altSession = altWindow.webContents.session; // получим Session {}
 ```
-
-2. В проект добавляем [electron-reload] - позволет обновлять окно без перезапуска проекта.  
-   Если используем Electron совместно с React CRA или Vue CLI данный модуль не нужен 
+В стандартной реализации, не зависимо сколько окон в прижении они имеют один общий объект Session {} 
 ```
-yarn add --dev electron-reload
-// в main.js прописываем строку
-
-require('electron-reload')(__dirname);
+ let defaultSession = session.defaultSession;
 ```
-
-3. В зависимоти от того как будет реализовано приложение и какая у него будет структура 
-  можно по разному прописывать пути к index.html
+Для того чтобы назначить для окна свою ссесию нужно ее отдельно создать и назначить окну и в названии должен стоять префикс persist:  
 ```
-// 1 - mainWindow.loadFile('index.html');
-// 2 - mainWindow.loadFile(`${path.join(__dirname, "/index.html")}`);
-// 3 - mainWindow.loadUrl('http://localhost:3000');
-// 4 - mainWindow.loadUrl(`file://${__dirname}/index.html`);
-// 5 - mainWindow.loadUrl(`file://${path.join(__dirname, "/public/index.html")}`);
+let appSession = session.fromPartition('persist:partitionOne')
+ mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      session: appSession, // подключеем индивидуальную сессию  
+    }
+  })
+``` 
+Написанное выше можно записать короче, не надо создовать let appSession
 ```
-
-1. Для отделения кода работающего только для разработки, добавляем модуль - [electron-is-dev]
-```
-npm install electron-is-dev
-// или
-yarn add electron-is-dev
-// в main.js прописываем и добавляем необходимый код
-const isDev = require('electron-is-dev');
- if (isDev) {
-    console.log('Running in development');
-} else {
-    console.log('Running in production');
-}
-```
-
-5. Для того чтобы убрать из консоли сообщения о недостаточной безопасности можно добавить строку, использовать только для разработки, для продакшен нужно настроить [безопасность] правильно.
-Добавляем так же webPreferences в объект BrowserWindow
-```
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
-
-// добавляем webPreferences в объект BrowserWindow
 mainWindow = new BrowserWindow({
-  webPreferences: {					
-    nodeIntegration: true,
-    webSecurity: false
-  }
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      partition: 'persist:partitionOne', // подключеем индивидуальную сессию 
+    }
+  })
+```
+Для очичистки значения localStorage в текущей сессии используем .clearStorageData()
+```
+mainSession.clearStorageData()
+```
+### [cookies]
+Для получения значений cookies используем конструкцию gh  запуске окна мы получим cookies с сайта
+```
+mainWindow.loadURL(`https://github.com`);
+let mainSession = mainWindow.webContents.session; 
+mainSession.cookies.get({}, (error, cookies) => { 
+  console.log('cookies - ', cookies);
+})
+```
+Мы можем записать свои cookies - 
+```
+mainSession.cookies.set({
+	url: 'https://myapp.com',
+	name: 'coocie1',
+	value: 'coocie_value',
+	domain: 'myapp.com'}, (error) => {
+
+	console.log('Cookies Set');
+	mainSession.cookies.get({}, 
+	(error, cookies) => { 
+  	console.log('cookies - ', cookies);
+	});
+
 });
 ```
-
-6. Для установки в DevTools расширений для работы с популярными фреймворками устанавливаем - [electron-devtools-installer]. В данном проекте не установлен.
+Для получения определенной записи в запросе указываем искомое значение, например имя
 ```
-npm install electron-devtools-installer --save-dev
-// or
-yarn add electron-devtools-installer --dev
-
-// в main.js прописываем 
-const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
-// добавляем необходимые расширение EMBER_INSPECTOR, REACT_DEVELOPER_TOOLS,
-// BACKBONE_DEBUGGER, JQUERY_DEBUGGER,  ANGULARJS_BATARANG, VUEJS_DEVTOOLS,  REDUX_DEVTOOLS, REACT_PERF,
-// CYCLEJS_DEVTOOL, MOBX_DEVTOOLS,  APOLLO_DEVELOPER_TOOLS
-
-// инсталируем расширение перед вызовом DevTools
-installExtension(REACT_DEVELOPER_TOOLS);
-mainWindow.webContents.openDevTools();
+ mainSession.cookies.get({ name: 'coocie1'}, (error, cookies) => { 
+    console.log('cookies - ', cookies);
+})
 ```
 
-7. Для установки в DevTools расширения [Devtron], которое помогает тестировать код, отслеживать баги и оптимально отлаживать приложени. Устанавливаем модуль в проект и иснталируем его.
+### [downloaditem]
+Для работы с загружаемыми файлами можно использовать событие 'will-download',
+Ниже приведен пример в котором показаны основные возможности данного решения
 ```
-npm install --save-dev devtron
-// или
-yarn add --dev devtron
+mainSession.on('will-download', (event, downloadItem, webContents) => {   
+    
+    // Получить имя скачиваемого файла
+    let file = downloadItem.getFilename();
+    console.log('file - ', file);
+    // Получить размер скачиваемого файла
+    let size = downloadItem.getFilename();
+    console.log('size - ', size);
+    // Указываем путь куда сохраняем файл
+    downloadItem.setSavePath('downloads/' + file)  
 
-// Прописываем в консоли запущеного приложения
-require('devtron').install();
-``` 
+    // Сообщение о процессе загрузки
+    downloadItem.on('updated', (event, state) => {
 
-[electron-reload]:https://www.npmjs.com/package/electron-reload
-[windows-build-tools]: https://www.npmjs.com/package/windows-build-tools
-[electron-is-dev]: https://www.npmjs.com/package/electron-is-dev
-[electron-devtools-installer]: https://www.npmjs.com/package/electron-devtools-installer
-[Devtron]: https://electronjs.org/devtron
-[безопасность]:https://electronjs.org/docs/tutorial/security
+      // Получить размер полученых байт 
+      let progress = Math.round((downloadItem.getReceivedBytes() / size) * 100)
+      
+      if (state === 'progressing') {
+        // Выводим в консоль процент загрузки
+        process.stdout.clearLine();
+        process.stdout.clearTo(0);
+        process.stdout.write('Downloaded - ' + progress + '%');
+      }     
+    })
+    
+    // Сообщение о успешной загрузке 
+    downloadItem.once('done', (event, state) => {
+      if (state === 'completed') {
+        console.log('Download successfully')
+      } else {
+        console.log(`Download failed: ${state}`)
+      }
+    })
+
+  })
+```
+[session]:https://electronjs.org/docs/api/session
+[cookies]:https://electronjs.org/docs/api/cookies
+[downloaditem]:https://electronjs.org/docs/api/download-item
