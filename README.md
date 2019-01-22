@@ -1,90 +1,140 @@
 # Electron - Полезные настройки и инструменты
 Список дополнительных инструментов для создания приложения на Electron.js
 
-1. Для нативной работы с модулями Node.js устанавливаем глобально -  [windows-build-tools]
+### [Menu] и [MenuItem]
+Подключение Menu и MenuItem
 ```
-npm install --global --production windows-build-tools
-// or
-yarn global add windows-build-tools
-```
-
-2. В проект добавляем [electron-reload] - позволяет обновлять окно без перезапуска проекта.  
-   Если используем Electron совместно с React CRA или Vue CLI данный модуль не нужен 
-```
-yarn add --dev electron-reload
-// в main.js прописываем строку
-
-require('electron-reload')(__dirname);
+const { app, BrowserWindow, Menu, MenuItem } = require('electron');
 ```
 
-3. В зависимости от того как будет реализовано приложение и какая у него будет структура 
-  можно по разному прописывать пути к index.html
+Есть несколько вариантов создания меню у приложения
+Первый вариант - 
 ```
-// 1 - mainWindow.loadFile('index.html');
-// 2 - mainWindow.loadFile(`${path.join(__dirname, "/index.html")}`);
-// 3 - mainWindow.loadUrl('http://localhost:3000');
-// 4 - mainWindow.loadUrl(`file://${__dirname}/index.html`);
-// 5 - mainWindow.loadUrl(`file://${path.join(__dirname, "/public/index.html")}`);
+// Создаем меню приложения
+let mainMenu = new Menu()
+
+// Создаем пункт меню приложения
+let menuItem1 = new MenuItem({
+  label: 'Electron',
+  submenu: [
+    { label: 'Item 1' },
+    { label: 'Item 2' },
+    { label: 'Item 3' },
+  ]
+})
+
+// Добавляем пункт меню в меню приложения
+mainMenu.append(menuItem1)
 ```
 
-4. Для отделения кода работающего только для разработки, добавляем модуль - [electron-is-dev]
+Второй вариант - 
 ```
-npm install electron-is-dev
-// или
-yarn add electron-is-dev
-// в main.js прописываем и добавляем необходимый код
-const isDev = require('electron-is-dev');
- if (isDev) {
-    console.log('Running in development');
-} else {
-    console.log('Running in production');
-}
-```
-
-5. Для того чтобы убрать из консоли сообщения о недостаточной безопасности можно добавить строку, использовать только для разработки, для продакшен нужно настроить [безопасность] правильно.
-Добавляем так же webPreferences в объект BrowserWindow
-```
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
-
-// добавляем webPreferences в объект BrowserWindow
-mainWindow = new BrowserWindow({
-  webPreferences: {					
-    nodeIntegration: true,
-    webSecurity: false
+let mainMenu = new Menu.buildFromTemplate([
+  {
+    label: 'Electron',
+    submenu: [
+      { label: 'Item 1' },
+      { label: 'Item 2' },
+      { label: 'Item 3' },
+    ]
+  },
+  {
+    label: 'Actions',
+    submenu: [
+      { label: 'Action 1' },
+      { label: 'Action 2' },
+      { label: 'Action 3' },
+    ]
   }
-});
+])
 ```
 
-6. Для установки в DevTools расширений для работы с популярными фреймворками устанавливаем - [electron-devtools-installer]. В данном проекте не установлен.
+Третий вариант - 
+Создаются отдельно файл (например - mainMenu.js) с конфигурацией меню 
 ```
-npm install electron-devtools-installer --save-dev
-// or
-yarn add electron-devtools-installer --dev
-
-// в main.js прописываем 
-const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
-// добавляем необходимые расширение EMBER_INSPECTOR, REACT_DEVELOPER_TOOLS,
-// BACKBONE_DEBUGGER, JQUERY_DEBUGGER,  ANGULARJS_BATARANG, VUEJS_DEVTOOLS,  REDUX_DEVTOOLS, REACT_PERF,
-// CYCLEJS_DEVTOOL, MOBX_DEVTOOLS,  APOLLO_DEVELOPER_TOOLS
-
-// инсталлируем расширение перед вызовом DevTools
-installExtension(REACT_DEVELOPER_TOOLS);
-mainWindow.webContents.openDevTools();
+module.exports = [
+	{
+		label: 'Electron', // Создаем пункт меню первого уровня
+		submenu: [
+			{ label: 'Item 1' },
+			{ label: 'Item 2' },
+			{ label: 'Item 3' },
+		]
+	},
+	{
+		label: 'Actions', // Создаем пункт меню первого уровня
+		submenu: [ 
+			{
+				label: 'Greet1', // Создаем пункт меню второго уровня
+				click: () => { console.log('Hello from Electron!') },  // Устанавливаем слушатель события click()
+				accelerator: 'Shift+Alt+G' // Назначаем горячие клавиши для вызова действия
+			},
+			{
+				label: 'Action 2', // Создаем пункт меню второго уровня
+				submenu: [
+					{
+						label: 'Greet2', // Создаем пункт меню третьего уровня
+						click: () => { console.log('Hello World!') },  // Устанавливаем слушатель события click()
+						accelerator: 'Shift+Alt+M', // Назначаем горячие клавиши для вызова действия
+						enabled: false // Делаем пункт меню неактивным
+					},
+					{
+						label: 'Greet3', // Создаем пункт меню третьего уровня
+						click: () => { console.log('Hello JS!') }, // Устанавливаем слушатель события click()
+						accelerator: 'Shift+Alt+L' // Назначаем горячие клавиши для вызова действия
+					}
+				]
+			},
+			{
+				label: 'Toggle Developer Tools',
+				role: 'toggledevtools' // Показываем или скрываем Dev Tools
+			},
+			{
+				role: 'togglefullscreen' // Разворачиваем и свораяиваем окна на весь экран
+			}
+		]
+	},
+	{
+		label: 'Edit', // Создаем пункт меню первого уровня
+		submenu: [
+			{ role: 'undo' },
+			{ role: 'redo' },
+			{ role: 'copy' },
+			{ role: 'paste' },
+		]
+	},
+]
 ```
 
-7. Для установки в DevTools расширения [Devtron], которое помогает тестировать код, отслеживать баги и оптимально отлаживать приложении. Устанавливаем модуль в проект и инсталлируем его.
+В main.js подключаем файл конфигурации 
 ```
-npm install --save-dev devtron
-// или
-yarn add --dev devtron
+let mainMenu = new Menu.buildFromTemplate(require('./mainMenu'))
+```
 
-// Прописываем в консоли запущенного приложения
-require('devtron').install();
+### [Context Menu]
+Создаем конфигурацию контекстного меню в отдельном файле - contextMenu.js
+```
+module.exports = [
+	{ role: 'undo' },
+	{ role: 'redo' },
+	{ type: 'separator' },
+	{ role: 'copy' },
+	{ role: 'paste' }
+]
+```
+
+// Создаем само контекстное меню и подключаем конфигурацию из файла contextMenu.js
 ``` 
+let contextMenu = new Menu.buildFromTemplate(require('./contextMenu'))
+```
 
-[electron-reload]:https://www.npmjs.com/package/electron-reload
-[windows-build-tools]: https://www.npmjs.com/package/windows-build-tools
-[electron-is-dev]: https://www.npmjs.com/package/electron-is-dev
-[electron-devtools-installer]: https://www.npmjs.com/package/electron-devtools-installer
-[Devtron]: https://electronjs.org/devtron
-[безопасность]:https://electronjs.org/docs/tutorial/security
+Создаем слушатель событий для показа пользователю контекстного меню
+```
+mainWindow.webContents.on('context-menu', (e) => {
+  e.preventDefault();
+  contextMenu.popup()
+})
+```
+[Menu]:https://electronjs.org/docs/api/menu
+[MenuItem]:https://electronjs.org/docs/api/menu-item
+[Context Menu]: https://electronjs.org/docs/api/web-contents#%D0%A1%D0%BE%D0%B1%D1%8B%D1%82%D0%B8%D0%B5-context-menu
