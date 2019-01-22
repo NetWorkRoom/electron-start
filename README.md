@@ -8,6 +8,8 @@
 4. [Electron API - BrowserWindow]
 5. [Electron API - session, Cookies, DownloadItem]
 6. [Electron API - dialog]
+7. [Electron API - Menu, Menuitem]
+8. [Electron API - Tray, powerMonitor]
 
 [Быстрый старт]: https://github.com/NetWorkRoom/electron-start/tree/start 
 [Полезные инструменты и настройки]: https://github.com/NetWorkRoom/electron-start/tree/tools
@@ -15,3 +17,5 @@
 [Electron API - BrowserWindow]: https://github.com/NetWorkRoom/electron-start/tree/browserwindow
 [Electron API - session, Cookies, DownloadItem]: https://github.com/NetWorkRoom/electron-start/tree/session
 [Electron API - dialog]: https://github.com/NetWorkRoom/electron-start/tree/dialog
+[Electron API - Menu, Menuitem]: https://github.com/NetWorkRoom/electron-start/tree/menu
+[Electron API - Tray, powerMonitor]: https://github.com/NetWorkRoom/electron-start/tree/tray
