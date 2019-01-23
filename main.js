@@ -12,7 +12,6 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 // закрываться автоматически, если объект JavaScript является объектом сборки мусора.
 let mainWindow
 
-
 // Первый вариант создания Меню
 // Создаем меню приложения
 // let mainMenu = new Menu()

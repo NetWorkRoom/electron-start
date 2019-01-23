@@ -25,6 +25,12 @@ let menuItem1 = new MenuItem({
 
 // Добавляем пункт меню в меню приложения
 mainMenu.append(menuItem1)
+
+// Вызываем созданное меню
+app.on('ready', () => {
+  createWindow()
+ Menu.setApplicationMenu(mainMenu) // Добавляем главное меню в приложение
+})
 ```
 
 Второй вариант - 
@@ -47,6 +53,12 @@ let mainMenu = new Menu.buildFromTemplate([
     ]
   }
 ])
+
+// Вызываем созданное меню
+app.on('ready', () => {
+  createWindow()
+ Menu.setApplicationMenu(mainMenu) // Добавляем главное меню в приложение
+})
 ```
 
 Третий вариант - 
@@ -90,7 +102,7 @@ module.exports = [
 				role: 'toggledevtools' // Показываем или скрываем Dev Tools
 			},
 			{
-				role: 'togglefullscreen' // Разворачиваем и свораяиваем окна на весь экран
+				role: 'togglefullscreen' // Разворачиваем и сворачиваем окна на весь экран
 			}
 		]
 	},
@@ -109,6 +121,12 @@ module.exports = [
 В main.js подключаем файл конфигурации 
 ```
 let mainMenu = new Menu.buildFromTemplate(require('./mainMenu'))
+
+// Вызываем созданное меню
+app.on('ready', () => {
+  createWindow()
+ Menu.setApplicationMenu(mainMenu) // Добавляем главное меню в приложение
+})
 ```
 
 ### [Context Menu]
