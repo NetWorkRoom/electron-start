@@ -1,5 +1,5 @@
 // Модули для управления жизнью приложения и создания собственного окна браузера.
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require("path");
 
 // Перерисовка окна при внесении изменений, без необходимости перезапускать проект. 
@@ -11,6 +11,47 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 // Сохранztv глобальную ссылку на объект window, В противном случае окно будет
 // закрываться автоматически, если объект JavaScript является объектом сборки мусора.
 let mainWindow
+
+ipcMain.on('sync-channal', (event, args) => { 
+  console.log('Sync message received');
+  console.log(args.name);
+  console.log(args.surname);
+
+  setTimeout(() => { 
+    event.returnValue = 'A synchronous response from the main process';
+  }, 3000)
+ 
+})
+
+ipcMain.on('sync-channal2', (event, args) => {
+  console.log('Sync message received');
+  console.log(args.name);
+  console.log(args.surname);
+
+  setTimeout(() => {
+    event.returnValue = 'A synchronous response from the main process';
+  }, 3000)
+
+})
+
+// ipcMain.on('ch1', (event, args) => {
+//   if (args.close) process.exit();
+// })
+
+// Создаем первый канал для получения и передачи данных в renderer
+ipcMain.on('channalOne', (event, args) => { 
+  console.log(args);
+  // Отправляем сообщение в renderer процесс
+  event.sender.send('channalOne','Message resieved on the main process - channalOne')
+})
+
+// Второй канал не будет работать
+// Создаем второй канал для получения и передачи данных в renderer
+ipcMain.on('channaTwo', (event, args) => {
+  console.log(args);
+  // Отправляем сообщение в renderer процесс
+  event.sender.send('channalTwo', 'Message resieved on the main process - channaTwo')
+})
 
 function createWindow() {
   // Создаем окно браузера.
@@ -30,6 +71,10 @@ function createWindow() {
   // Открываем инструменты разработчика (DevTools). 
   // Если необходимо раскомментируйте строку ниже
   mainWindow.webContents.openDevTools()
+
+  // mainWindow.webContents.on('did-finish-load', () => { 
+  //   mainWindow.webContents.send('private', 'Message from Main Precess to MainWindow')
+  // })
 
   // Запускается при закрытии окна.
   mainWindow.on('closed', function () {
