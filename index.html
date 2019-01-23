@@ -3,10 +3,24 @@
   <head>
     <meta charset="UTF-8">
     <title>Hello Electron!</title>
+    <style>
+      a {
+        text-decoration: underline;
+        cursor: pointer;
+        color:royalblue;
+      }
+    </style>
   </head>
   <body>
     <h1 style="color:brown;">HTML контент загружен из файла index.html</h1>
     <p>Просто немного текста для примера</p>
+
+    <!-- <h3><a href="http://google.com" target="_blank">Open Google</a></h3> -->
+    <h3><a onclick="open_win()">Open Google</a></h3>
+    <h3><a onclick="close_win()">Close Google</a></h3>
+    <h3><a onclick="alert_win('An alert initiated by main window')">Alert on Google</a></h3>
+    <h3><a id="google_link">Open Google from ID</a></h3>
+
     <!-- Весь Node.js APIs будет доступен здесь. -->
     Вы используете Node.js - <script>document.write(process.versions.node)</script>,
     Chromium - <script>document.write(process.versions.chrome)</script>,
@@ -14,7 +28,27 @@
 
     <script>
       // Подключаем файл renderer.js, здесь Вы можете при необходимости подключить и другие файлы  
-      require('./renderer.js')
+      // require('./renderer.js')
+
+      let win;
+      // Открываем окно с сайтом
+      const open_win = () => {
+        win = window.open('http://google.com')
+      }
+      // Закрываем окно с сайтом
+      const close_win = () => {
+         win.close()
+         console.log('Closing Child Window!')
+      }
+      // Запускаем алерт с сообщением
+      const alert_win = (msg) => {
+        win.eval(`alert('${msg}')`)          
+      }
+      // Открываем окно с сайтом по id и заданными параметрами окна
+      document.getElementById('google_link').addEventListener('click', () => {
+         win = window.open('http://google.com', 'Google Window', 'resizable=no,width=960')
+      });
+
     </script>
   </body>
 </html>
