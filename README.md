@@ -14,7 +14,7 @@ let mainWindow, tray
 ```
 function createTray() {
   tray = new Tray('./path/icon.ico') // путь и название файла иконки
-	tray.setToolTip('Name App') // Будет показанап подсказка при наведении курсора мыши
+	tray.setToolTip('Name App') // Будет показана подсказка при наведении курсора мыши
 
 	// Создаем меню в трее 
   const trayMenu = Menu.buildFromTemplate([
@@ -30,7 +30,7 @@ function createTray() {
     mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
   })
 
-	// Подсвечиваем как ативное приложение 
+	// Подсвечиваем как активное приложение 
   mainWindow.on('show', () => {
     tray.setHighlightMode('always')
   })
@@ -50,7 +50,7 @@ app.on('ready', () => {
 ```
 
 ### [powerMonitor]
-Для отслеживания событий в операционной системе (напрмер переход в режим сна, или состояние заряда в батарее) используют - powerMonitor
+Для отслеживания событий в операционной системе (например переход в режим сна, или состояние заряда в батарее) используют - powerMonitor
 ```
 app.on('ready', () => { 
   createWindow()  
