@@ -1,90 +1,112 @@
 # Electron - Полезные настройки и инструменты
 Список дополнительных инструментов для создания приложения на Electron.js
 
-1. Для нативной работы с модулями Node.js устанавливаем глобально -  [windows-build-tools]
+### [webFrame]
+#### Первый пример использования webFrame  
+Увеличение или уменьшение размера контента в окне приложения
 ```
-npm install --global --production windows-build-tools
-// or
-yarn global add windows-build-tools
+<!-- Создаем разметку в index.html -->
+<h1>webFrame</h1>
+<img src="http://placehold.it/200x150" alt="">
+<hr>
+<button id="zoom_up">Увеличить</button>
+<button id="zoom_down">Уменьшить</button>
+<button id="zoom_reset">Вернуть</button>
+```
+Подключаем в рендер-процессе webFrame и подключаем слушателей событий к кнопкам
+```
+<script>
+// подключаем класс webFrame
+  const { webFrame } = require('electron')
+
+  // Размер контента вэкране по умолчанию
+  let zoom = 0;
+
+  // подключаем слушатель событий к кнопке Увеличить
+  document.getElementById('zoom_up').addEventListener('click', () => {
+    // Вызываем метод .setZoomLevel и предаем значение zoom увеличеное на 1
+    webFrame.setZoomLevel(++zoom)
+  })
+
+  // подключаем слушатель событий к кнопке Уменьшить
+  document.getElementById('zoom_down').addEventListener('click', () => {
+    // Вызываем метод .setZoomLevel и предаем значение zoom уменьшеное на 1
+    webFrame.setZoomLevel(--zoom)
+  })
+
+  // подключаем слушатель событий к кнопке Вернуть
+  document.getElementById('zoom_reset').addEventListener('click', () => {
+    // Вызываем метод .setZoomLevel и предаем значение zoom равное 0
+    webFrame.setZoomLevel(zoom = 0)
+  })
+
+</script>
+```
+#### Второй пример использования webFrame  
+Запуск js кода непоредственно на странице используя тег textarea
+```
+<!-- Создаем разметку в index.html -->
+<h3>Напишите JavaScript код</h3>
+<textarea id="code" name="name" id="" cols="30" rows="10"></textarea>
+<hr>
+<button id="run_js">Запустить</button>
+```
+Подключаем слушатель событий к кнопке Запустить
+```
+document.getElementById('run_js').addEventListener('click', () => {
+  let code = document.getElementById('code').value
+  // Вызываем метод .executeJavaSript и предаем в него значение code
+  webFrame.executeJavaScript(code)
+})
+```
+#### Третий пример использования webFrame
+Пример получение объекта с информацией о элементах на странице
+```
+let resourceUsage = webFrame.getResourceUsage()
+console.log(resourceUsage)
 ```
 
-2. В проект добавляем [electron-reload] - позволяет обновлять окно без перезапуска проекта.  
-   Если используем Electron совместно с React CRA или Vue CLI данный модуль не нужен 
+### [Тег \<webview\>]
+Позволяет запускать дочернии рендер-процессы внутри основного рендер процесса
+чем то напоминает \<iframe\> 
 ```
-yarn add --dev electron-reload
-// в main.js прописываем строку
+<webview src="page1.html">
+```
+Пример с отслеживанием загрузки страницы изменением цвета фона страницы
+```
+// Отслеживание событий загрузки контента в webview
+const webview = document.getElementById('webviewtag')
+webview.addEventListener('did-start-loading', () => {
+  console.log('Started Loading WebView!')
+})
 
-require('electron-reload')(__dirname);
-```
+webview.addEventListener('did-stop-loading', () => {
+  console.log('Finished Loading WebView!')
+  // Меняем цвет фона окна после загрузки
+  webview.insertCSS('body{background-color: orange !important;}')
+})
 
-3. В зависимости от того как будет реализовано приложение и какая у него будет структура 
-  можно по разному прописывать пути к index.html
-```
-// 1 - mainWindow.loadFile('index.html');
-// 2 - mainWindow.loadFile(`${path.join(__dirname, "/index.html")}`);
-// 3 - mainWindow.loadUrl('http://localhost:3000');
-// 4 - mainWindow.loadUrl(`file://${__dirname}/index.html`);
-// 5 - mainWindow.loadUrl(`file://${path.join(__dirname, "/public/index.html")}`);
-```
+// Получаем доступ к элементами для загрузки страницы
+const url = document.getElementById('url');
+const load = document.getElementById('load');
+const currentPage = document.getElementById('currentPage');
 
-4. Для отделения кода работающего только для разработки, добавляем модуль - [electron-is-dev]
-```
-npm install electron-is-dev
-// или
-yarn add electron-is-dev
-// в main.js прописываем и добавляем необходимый код
-const isDev = require('electron-is-dev');
- if (isDev) {
-    console.log('Running in development');
-} else {
-    console.log('Running in production');
-}
-```
-
-5. Для того чтобы убрать из консоли сообщения о недостаточной безопасности можно добавить строку, использовать только для разработки, для продакшен нужно настроить [безопасность] правильно.
-Добавляем так же webPreferences в объект BrowserWindow
-```
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
-
-// добавляем webPreferences в объект BrowserWindow
-mainWindow = new BrowserWindow({
-  webPreferences: {					
-    nodeIntegration: true,
-    webSecurity: false
-  }
+// Загружаем страницу
+load.addEventListener('click', () => {
+  webview.loadURL(url.value)
+  url.value = '';
 });
+
+// Выводим на странице url загруженного контента
+  webview.addEventListener('did-navigate', (event) => {
+  currentPage.innerHTML = event.url
+})
+
+// Выводим на странице сообщение об ошибке загрузки
+  webview.addEventListener('did-fail-load', (event) => {
+  currentPage.innerHTML = 'Failed to load URL'
+})
 ```
 
-6. Для установки в DevTools расширений для работы с популярными фреймворками устанавливаем - [electron-devtools-installer]. В данном проекте не установлен.
-```
-npm install electron-devtools-installer --save-dev
-// or
-yarn add electron-devtools-installer --dev
-
-// в main.js прописываем 
-const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
-// добавляем необходимые расширение EMBER_INSPECTOR, REACT_DEVELOPER_TOOLS,
-// BACKBONE_DEBUGGER, JQUERY_DEBUGGER,  ANGULARJS_BATARANG, VUEJS_DEVTOOLS,  REDUX_DEVTOOLS, REACT_PERF,
-// CYCLEJS_DEVTOOL, MOBX_DEVTOOLS,  APOLLO_DEVELOPER_TOOLS
-
-// инсталлируем расширение перед вызовом DevTools
-installExtension(REACT_DEVELOPER_TOOLS);
-mainWindow.webContents.openDevTools();
-```
-
-7. Для установки в DevTools расширения [Devtron], которое помогает тестировать код, отслеживать баги и оптимально отлаживать приложении. Устанавливаем модуль в проект и инсталлируем его.
-```
-npm install --save-dev devtron
-// или
-yarn add --dev devtron
-
-// Прописываем в консоли запущенного приложения
-require('devtron').install();
-``` 
-
-[electron-reload]:https://www.npmjs.com/package/electron-reload
-[windows-build-tools]: https://www.npmjs.com/package/windows-build-tools
-[electron-is-dev]: https://www.npmjs.com/package/electron-is-dev
-[electron-devtools-installer]: https://www.npmjs.com/package/electron-devtools-installer
-[Devtron]: https://electronjs.org/devtron
-[безопасность]:https://electronjs.org/docs/tutorial/security
+[webFrame]:https://electronjs.org/docs/api/web-frame
+[Тег \<webview\>]: https://www.npmjs.com/package/windows-build-tools
