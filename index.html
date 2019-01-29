@@ -3,6 +3,21 @@
   <head>
     <meta charset="UTF-8">
     <title>Hello Electron!</title>
+    <style media="screen">
+      .box {
+        border: 5px dashed black;
+        padding: 3rem 4rem;
+        color: white;
+        float: left;
+      }
+      #filebox {
+        background-color: green;
+        margin-right: 20px;
+      }
+      #trashbox {
+        background-color: red;
+      }
+    </style>
   </head>
   <body>
     <h1 style="color:brown;">HTML контент загружен из файла index.html</h1>
@@ -11,8 +26,38 @@
     Вы используете Node.js - <script>document.write(process.versions.node)</script>,
     Chromium - <script>document.write(process.versions.chrome)</script>,
     и Electron - <script>document.write(process.versions.electron)</script>.
+    <hr>
+    <div class="box" id="filebox">
+      Open File Here!
+    </div>
+
+    <div class="box" id="trashbox">
+      Delete File Here!
+    </div>
+
+    <hr>
+
+    <img id="logoImage" src="" alt="">
 
     <script>
+    
+      const { nativeImage } = require('electron')  ;    
+
+      let logo = nativeImage.createFromPath('logo.png');
+      let logoSize = logo.getSize();
+
+      console.log(logo.getSize());
+      console.log(logo.toDataURL());
+
+      document.getElementById('logoImage')
+      .src = logo.resize({width: logoSize.width/2 , height: logoSize.height/2 }).toDataURL()
+
+      // const fs = require('fs');
+      // fs.writeFile('logo.png', logo.toJPEG(100), (err) => {
+      //     if (err) throw err;
+      //     console.log('The file has been saved!');
+      //   });
+
       // Подключаем файл renderer.js, здесь Вы можете при необходимости подключить и другие файлы  
       require('./renderer.js')
     </script>
