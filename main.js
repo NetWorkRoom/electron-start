@@ -1,46 +1,41 @@
 // Модули для управления жизнью приложения и создания собственного окна браузера.
+const electron = require('electron');
 const { app, BrowserWindow } = require('electron');
 const path = require("path");
 
 // Перерисовка окна при внесении изменений, без необходимости перезапускать проект. 
 require('electron-reload')(__dirname);
 
-// Для отделения кода работающего только для разработки, добавляем модуль electron-is-dev
-const isDev = require('electron-is-dev');
-
-if (isDev) {
-  console.log('Running in development');
-} else {
-  console.log('Running in production');
-}
-
 // Для отключения сообщений о недостаточной безопасности добавляем строку
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
-
-// Выводим сообщение в консоли Node.js о запущеном процессе
-console.log('Executing main.js');
 
 // Сохранztv глобальную ссылку на объект window, В противном случае окно будет
 // закрываться автоматически, если объект JavaScript является объектом сборки мусора.
 let mainWindow
 
+// console.log(process);
+console.log('Process Type - ', process.type);
+console.log('Electron Version - ', process.versions.electron);
+console.log('Chrome (Chromium) Version - ', process.versions.chrome);
+console.log('Resource Path - ', process.resourcesPath);
+
 function createWindow() {
-  // Выводим сообщение в консоли браузера о создании нового окна
-  console.log('Creating mainWindow');
+
+  // Для открытия окна по размеру монитора
+  const display = electron.screen.getPrimaryDisplay();
 
   // Создаем окно браузера.
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: display.size.width,
+    height: display.size.height,
+    x: display.bounds.x,
+    y: display.bounds.y,
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false
     }
   })
   
-  // Выводим сообщение в консоли браузера о подключении файла index.html
-  console.log('Loading index.html into mainWindow');
-
   // и загружаем файл index.html он содержит наше приложение.
   // mainWindow.loadFile('index.html');
   // Вариант с указанием пути к файлу
@@ -48,14 +43,18 @@ function createWindow() {
 
   // Открываем инструменты разработчика (DevTools). 
   // Если необходимо раскомментируйте строку ниже
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
+
+  // mainWindow.on('crashed', () => {
+  //   console.log('MainWindow Renderer Process Crashed. Reloading');
+  //   mainWindow.reload();
+  // })
+
+  console.log(process.getSystemMemoryInfo());
 
   // Запускается при закрытии окна.
   mainWindow.on('closed', function () {
 
-    // Выводим сообщение в консоли Node.js при закрытии окна
-    console.log('mainWindow closed!');
-    
     // После закрытия окна ,удаляются ранее созданные объекты 
     // для организации работы приложения.
     mainWindow = null

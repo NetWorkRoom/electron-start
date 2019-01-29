@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8">    
     <title>Hello Electron!</title>
+    <style>
+      html, body {
+        height: 100%;
+      }
+      html {
+        border: 5px solid red;
+      }
+    </style>
   </head>
-  <body>
+  <body onclick="showClickPoint()">
     <h1 style="color:brown;">HTML контент загружен из файла index.html</h1>
     <p>Просто немного текста для примера</p>
     <!-- Весь Node.js APIs будет доступен здесь. -->
@@ -12,7 +20,18 @@
     Chromium - <script>document.write(process.versions.chrome)</script>,
     и Electron - <script>document.write(process.versions.electron)</script>.
 
+    <hr>
+    <button onclick="alert('Hello!')">Greet</button>
+    <hr>
+
+
     <script>
+      const electron = require('electron');
+
+      function showClickPoint() {
+          console.log(electron.screen.getCursorScreenPoint());
+      }
+
       // Подключаем файл renderer.js, здесь Вы можете при необходимости подключить и другие файлы  
       require('./renderer.js')
     </script>

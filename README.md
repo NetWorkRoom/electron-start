@@ -1,90 +1,98 @@
 # Electron - Полезные настройки и инструменты
 Список дополнительных инструментов для создания приложения на Electron.js
 
-1. Для нативной работы с модулями Node.js устанавливаем глобально -  [windows-build-tools]
+### [process]
+Объект Electron process является расширенной версией объекта Node.js process,
+его можно вызывать как в main так и в renderer процессах
+main.js
 ```
-npm install --global --production windows-build-tools
-// or
-yarn global add windows-build-tools
+console.log('Process Type - ', process.type);
+console.log('Electron Version - ', process.versions.electron);
+console.log('Chrome (Chromium) Version - ', process.versions.chrome);
+console.log('Resource Path - ', process.resourcesPath);
+console.log(process.getSystemMemoryInfo());
+```
+renderer.js
+```
+console.log('Process Type - ', process.type);
+console.log('Electron Version - ', process.versions.electron);
+console.log('Chrome (Chromium) Version - ', process.versions.chrome);
+console.log('Resource Path - ', process.resourcesPath);
+console.log(process.getSystemMemoryInfo());
+```
+Примеры использования - process 
+Подключем слушатель на событие 'сrashed', если оно происходит приложение перезагрузится
+```
+// main.js
+mainWindow.on('crashed', () => {
+  console.log('MainWindow Renderer Process Crashed. Reloading');
+  mainWindow.reload();
+})
+
+// renderer.js 
+setTimeout(process.crash, 5000)
+```
+Устанавливаем кнопку в index.html, по клику будет появлятся сообщение "Hello", но через 5 секунд кнопка теряет свою работоспособность.
+```
+// index.html
+<button onclick="alert('Hello!')">Greet</button>
+
+// renderer.js 
+setTimeout(() => { 
+	console.log('hanging');
+	process.hang();
+}, 5000)
 ```
 
-2. В проект добавляем [electron-reload] - позволяет обновлять окно без перезапуска проекта.  
-   Если используем Electron совместно с React CRA или Vue CLI данный модуль не нужен 
+### [screen]
+Предоставляет информацию о размере экрана, дисплеях, позиции курсора.
+Пример получения информации о мониторе, где запущена программа
 ```
-yarn add --dev electron-reload
-// в main.js прописываем строку
+const electron = require('electron')
+const displays = electron.screen.getAllDisplays();
 
-require('electron-reload')(__dirname);
-```
+// Выведет информацию о разрешении монитора
+console.log(displays[0].size.width, displays[0].size.height);
+// Для отображения нужен второй монитор
+// console.log(displays[1].size.width, displays[1].size.height);
+console.log(displays[0].bounds.x, displays[0].bounds.y);
+// Для отображения нужен второй монитор
+// console.log(displays[1].bounds.x, displays[1].bounds.y);
 
-3. В зависимости от того как будет реализовано приложение и какая у него будет структура 
-  можно по разному прописывать пути к index.html
+// Сработает при изменении размеров монитора
+electron.screen.on('display-metrics-changed', (event, display, changeMetrics) => { 
+	console.log(display);
+	console.log(changeMetrics);
+})
 ```
-// 1 - mainWindow.loadFile('index.html');
-// 2 - mainWindow.loadFile(`${path.join(__dirname, "/index.html")}`);
-// 3 - mainWindow.loadUrl('http://localhost:3000');
-// 4 - mainWindow.loadUrl(`file://${__dirname}/index.html`);
-// 5 - mainWindow.loadUrl(`file://${path.join(__dirname, "/public/index.html")}`);
+Пример получения коррдинат при клике курсором мыши
 ```
-
-4. Для отделения кода работающего только для разработки, добавляем модуль - [electron-is-dev]
-```
-npm install electron-is-dev
-// или
-yarn add electron-is-dev
-// в main.js прописываем и добавляем необходимый код
-const isDev = require('electron-is-dev');
- if (isDev) {
-    console.log('Running in development');
-} else {
-    console.log('Running in production');
-}
-```
-
-5. Для того чтобы убрать из консоли сообщения о недостаточной безопасности можно добавить строку, использовать только для разработки, для продакшен нужно настроить [безопасность] правильно.
-Добавляем так же webPreferences в объект BrowserWindow
-```
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
-
-// добавляем webPreferences в объект BrowserWindow
-mainWindow = new BrowserWindow({
-  webPreferences: {					
-    nodeIntegration: true,
-    webSecurity: false
+// index.html
+<body onclick="showClickPoint()">
+<!-- Контент -->
+</body>
+<script>
+  const electron = require('electron');
+  function showClickPoint() {
+    // Выведет в консоли объект с координатами, где кликнули курсором
+    console.log(electron.screen.getCursorScreenPoint());
   }
-});
+</script>
+</body>
 ```
-
-6. Для установки в DevTools расширений для работы с популярными фреймворками устанавливаем - [electron-devtools-installer]. В данном проекте не установлен.
+Пример настроек для открытия окна на ширину и высоту монитора
 ```
-npm install electron-devtools-installer --save-dev
-// or
-yarn add electron-devtools-installer --dev
+const electron = require('electron');
+// Получаем размеры и координаты монитора
+const display = electron.screen.getPrimaryDisplay();
 
-// в main.js прописываем 
-const { default: installExtension, REACT_DEVELOPER_TOOLS } = require('electron-devtools-installer');
-// добавляем необходимые расширение EMBER_INSPECTOR, REACT_DEVELOPER_TOOLS,
-// BACKBONE_DEBUGGER, JQUERY_DEBUGGER,  ANGULARJS_BATARANG, VUEJS_DEVTOOLS,  REDUX_DEVTOOLS, REACT_PERF,
-// CYCLEJS_DEVTOOL, MOBX_DEVTOOLS,  APOLLO_DEVELOPER_TOOLS
-
-// инсталлируем расширение перед вызовом DevTools
-installExtension(REACT_DEVELOPER_TOOLS);
-mainWindow.webContents.openDevTools();
+// Создаем окно браузера.
+mainWindow = new BrowserWindow({
+  width: display.size.width,
+  height: display.size.height,
+  x: display.bounds.x,
+  y: display.bounds.y,
+})
 ```
-
-7. Для установки в DevTools расширения [Devtron], которое помогает тестировать код, отслеживать баги и оптимально отлаживать приложении. Устанавливаем модуль в проект и инсталлируем его.
-```
-npm install --save-dev devtron
-// или
-yarn add --dev devtron
-
-// Прописываем в консоли запущенного приложения
-require('devtron').install();
-``` 
-
-[electron-reload]:https://www.npmjs.com/package/electron-reload
-[windows-build-tools]: https://www.npmjs.com/package/windows-build-tools
-[electron-is-dev]: https://www.npmjs.com/package/electron-is-dev
-[electron-devtools-installer]: https://www.npmjs.com/package/electron-devtools-installer
-[Devtron]: https://electronjs.org/devtron
-[безопасность]:https://electronjs.org/docs/tutorial/security
+[process]: https://electronjs.org/docs/api/process
+[screen]: https://electronjs.org/docs/api/screen
