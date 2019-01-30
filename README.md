@@ -15,6 +15,8 @@
 11. [Electron API - webFrame, \<webview\>]
 12. [Electron API - process, screen]
 13. [Electron API - shell, nativeImage]
+14. [Electron API - clipboard, Закадровый рендеринг]
+15. [Electron API - Online/Offline Status, Battery Status]
 
 [Быстрый старт]: https://github.com/NetWorkRoom/electron-start/tree/start 
 [Полезные инструменты и настройки]: https://github.com/NetWorkRoom/electron-start/tree/tools
@@ -29,3 +31,5 @@
 [Electron API - webFrame, \<webview\>]: https://github.com/NetWorkRoom/electron-start/tree/webframe
 [Electron API - process, screen]: https://github.com/NetWorkRoom/electron-start/tree/process
 [Electron API - shell, nativeImage]: https://github.com/NetWorkRoom/electron-start/tree/shell
+[Electron API - clipboard, Закадровый рендеринг]: https://github.com/NetWorkRoom/electron-start/tree/clipboard
+[Electron API - Online/Offline Status, Battery Status]: https://github.com/NetWorkRoom/electron-start/tree/network
