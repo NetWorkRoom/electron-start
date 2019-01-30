@@ -13,6 +13,8 @@
 9. [Electron API - remote, BrowserWindowProxy]
 10. [Electron API - ipcMain, ipcRenderer]
 11. [Electron API - webFrame, \<webview\>]
+12. [Electron API - process, screen]
+13. [Electron API - shell, nativeImage]
 
 [Быстрый старт]: https://github.com/NetWorkRoom/electron-start/tree/start 
 [Полезные инструменты и настройки]: https://github.com/NetWorkRoom/electron-start/tree/tools
@@ -25,3 +27,5 @@
 [Electron API - remote, BrowserWindowProxy]: https://github.com/NetWorkRoom/electron-start/tree/remote
 [Electron API - ipcMain, ipcRenderer]: https://github.com/NetWorkRoom/electron-start/tree/ipc
 [Electron API - webFrame, \<webview\>]: https://github.com/NetWorkRoom/electron-start/tree/webframe
+[Electron API - process, screen]: https://github.com/NetWorkRoom/electron-start/tree/process
+[Electron API - shell, nativeImage]: https://github.com/NetWorkRoom/electron-start/tree/shell
